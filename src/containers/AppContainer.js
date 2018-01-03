@@ -5,14 +5,24 @@ import serialize from "form-serialize";
 class AppContainer extends Component {
 	constructor() {
 		super();
-
-		// Initialize users in state as an empty array and
-		// set isFetching to false.
 		this.state = {
 			users: [],
 			isFetching: false,
 			error: null
 		};
+	}
+
+	componentDidMount() {
+		this.setState({ isFetching: true });
+
+		fetch("https://reqres.in/api/users?delay=1")
+			.then(response => response.json())
+			.then(json => {
+				this.setState({
+					users: json.data,
+					isFetching: false
+				});
+			});
 	}
 
 	onAddUser = e => {
@@ -64,26 +74,58 @@ class AppContainer extends Component {
 			});
 	};
 
-	componentDidMount() {
-		// Before performing the fetch, set isFetching to true
+	onDeleteUser = e => {
+		e.preventDefault();
+		const userId = e.target.name;
+
+		const headers = new Headers();
+		headers.append("Content-Type", "application/json");
+
+		const options = {
+			headers,
+			method: "DELETE"
+		};
+
+		console.log("deleting");
+
 		this.setState({ isFetching: true });
 
-		// After component mounts, call the API to get the
-		// users, then update state which triggers re-render.
-		// Add a delay to the URL and reset isFetching upon
-		// completion of the request.
-		fetch("https://reqres.in/api/users?delay=1")
-			.then(response => response.json())
-			.then(json => {
+		fetch(`https://reqres.in/api/users/${userId}`, options)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`${response.status} ${response.statusText}`);
+				}
+
+				console.log("deleting");
+				return true;
+			})
+			.then(() => {
+				const newUsers = this.state.users.filter(e => e.id != userId);
+
 				this.setState({
-					users: json.data,
-					isFetching: false
+					isFetching: false,
+					users: newUsers
+				});
+
+				console.log("deleted");
+			})
+			.catch(error => {
+				console.log(error);
+				this.setState({
+					isFetching: false,
+					error
 				});
 			});
-	}
+	};
 
 	render() {
-		return <App onAddUser={this.onAddUser} {...this.state} />;
+		return (
+			<App
+				onAddUser={this.onAddUser}
+				onDeleteUser={this.onDeleteUser}
+				{...this.state}
+			/>
+		);
 	}
 }
 

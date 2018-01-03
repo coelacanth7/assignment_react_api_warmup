@@ -9,11 +9,6 @@ const JumbotronFluid = props => {
 			<p className="lead">{lead}</p>
 			<hr className="my-4" />
 			<p>hey</p>
-			<p className="lead">
-				<a className="btn btn-primary btn-lg" href="#" role="button">
-					Learn more
-				</a>
-			</p>
 		</div>
 	);
 };
