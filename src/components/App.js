@@ -4,7 +4,18 @@ import JumbotronFluid from "./elements/JumbotronFluid";
 import UserList from "./UserList";
 import UserForm from "./UserForm";
 
-const App = ({ users, isFetching, error, onAddUser, onDeleteUser }) => {
+const App = ({
+	users,
+	user,
+	isFetching,
+	isEditing,
+	error,
+	onAddUser,
+	onDeleteUser,
+	onEditUser,
+	onSaveEditUser,
+	onChange
+}) => {
 	return (
 		<div className="App">
 			<JumbotronFluid
@@ -15,9 +26,23 @@ const App = ({ users, isFetching, error, onAddUser, onDeleteUser }) => {
 				users={users}
 				isFetching={isFetching}
 				onDeleteUser={onDeleteUser}
+				onEditUser={onEditUser}
 			/>
 			<br />
-			<UserForm onSubmit={onAddUser} />
+			{isEditing ? (
+				<UserForm
+					onSubmit={onSaveEditUser}
+					head={`Edit ${user.first_name}`}
+					user={user}
+					onChange={onChange}
+				/>
+			) : (
+				<UserForm
+					onSubmit={onAddUser}
+					head="Add New User"
+					onChange={onChange}
+				/>
+			)}
 		</div>
 	);
 };

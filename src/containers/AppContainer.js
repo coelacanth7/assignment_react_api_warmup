@@ -8,7 +8,14 @@ class AppContainer extends Component {
 		this.state = {
 			users: [],
 			isFetching: false,
-			error: null
+			error: null,
+			isEditing: false,
+			user: {
+				first_name: "",
+				last_name: "",
+				avatar: "",
+				id: ""
+			}
 		};
 	}
 
@@ -118,11 +125,100 @@ class AppContainer extends Component {
 			});
 	};
 
+	onEditUser = e => {
+		e.preventDefault();
+		let userId = e.target.name;
+		let thisUser = this.state.users.find(el => el.id == userId);
+		this.setState({
+			isEditing: true,
+			user: {
+				first_name: thisUser.first_name,
+				last_name: thisUser.last_name,
+				avatar: thisUser.avatar,
+				id: thisUser.id
+			}
+		});
+	};
+
+	onSaveEditUser = e => {
+		e.preventDefault();
+		const form = e.target;
+		const body = serialize(form, { hash: true });
+
+		const headers = new Headers();
+		headers.append("Content-Type", "application/json");
+
+		const options = {
+			headers,
+			method: "PUT",
+			body: JSON.stringify(body)
+		};
+
+		this.setState({ isFetching: true });
+
+		const userId = this.state.user.id;
+
+		fetch(`https://reqres.in/api/users/${userId}`, options)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`${response.status} ${response.statusText}`);
+				}
+
+				return response.json();
+			})
+			.then(json => {
+				console.log("json response", json);
+				var newUsers = [];
+
+				this.state.users.forEach(user => {
+					if (user.id == userId) {
+						newUsers.push(json);
+					} else {
+						newUsers.push(user);
+					}
+				});
+
+				this.setState(
+					{
+						isFetching: false,
+						users: newUsers,
+						isEditing: false,
+						user: {
+							first_name: "",
+							last_name: "",
+							avatar: "",
+							id: ""
+						}
+					},
+					() => {
+						form.reset();
+					}
+				);
+			})
+			.catch(error => {
+				// Set error in state & log to console
+				console.log(error);
+				this.setState({
+					isFetching: false,
+					error
+				});
+			});
+	};
+
+	onChangeInput = e => {
+		this.setState({
+			[e.target.name]: e.target.value
+		});
+	};
+
 	render() {
 		return (
 			<App
 				onAddUser={this.onAddUser}
 				onDeleteUser={this.onDeleteUser}
+				onEditUser={this.onEditUser}
+				onSaveEditUser={this.onSaveEditUser}
+				onChange={this.onChangeInput}
 				{...this.state}
 			/>
 		);
