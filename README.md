@@ -1,6 +1,6 @@
-# assignment_react_api_warmup
+# React Create Read Update Destroy
 
-Adding the UD to the CR for Users... APIs in React
+This is a practice app that I built while learning react. It uses fake api data to Create Read Update Destroy users.
 
 Gregory Alford
 
